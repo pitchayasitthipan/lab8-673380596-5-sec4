@@ -1,0 +1,80 @@
+package com.example.demo.controller;
+
+import com.example.demo.model.Product;
+import com.example.demo.model.ProductDetail;
+import com.example.demo.model.Review;
+import com.example.demo.service.ProductService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+@Controller
+@RequestMapping("/products")
+public class ProductController {
+
+    private final ProductService productService;
+
+    @Autowired
+    public ProductController(ProductService productService) {
+        this.productService = productService;
+    }
+
+    @GetMapping
+    public String listProducts(Model model) {
+        model.addAttribute("products", productService.getAllProducts());
+        return "products/list";
+    }
+
+    @GetMapping("/add")
+    public String showAddForm(Model model) {
+        Product product = new Product();
+        product.setDetail(new ProductDetail());
+
+        product.getReviews().add(new Review());
+
+        model.addAttribute("product", product);
+        return "products/add";
+    }
+
+    @PostMapping("/save")
+    public String saveProduct(@ModelAttribute("product") Product product, RedirectAttributes redirectAttributes) {
+        productService.saveProduct(product);
+        redirectAttributes.addFlashAttribute("message", "บันทึกข้อมูลสินค้าเรียบร้อยแล้ว!");
+        return "redirect:/products";
+    }
+
+    @GetMapping("/edit/{id}")
+    public String showEditForm(@PathVariable("id") Long id, Model model) {
+        Product product = productService.getProductById(id);
+        if (product.getDetail() == null) {
+            product.setDetail(new ProductDetail());
+        }
+        model.addAttribute("product", product);
+        return "products/edit";
+    }
+
+    @PostMapping("/update/{id}")
+    public String updateProduct(@PathVariable("id") Long id,
+            @ModelAttribute("product") Product product,
+            RedirectAttributes redirectAttributes) {
+        product.setId(id);
+        productService.saveProduct(product);
+        redirectAttributes.addFlashAttribute("message", "อัปเดตข้อมูลสินค้าเรียบร้อยแล้ว!");
+        return "redirect:/products";
+    }
+
+    @GetMapping("/delete/{id}")
+    public String showDeleteConfirm(@PathVariable("id") Long id, Model model) {
+        model.addAttribute("product", productService.getProductById(id));
+        return "products/delete";
+    }
+
+    @PostMapping("/delete/{id}")
+    public String deleteProduct(@PathVariable("id") Long id, RedirectAttributes redirectAttributes) {
+        productService.deleteProduct(id);
+        redirectAttributes.addFlashAttribute("message", "ลบสินค้าเรียบร้อยแล้ว!");
+        return "redirect:/products";
+    }
+}
