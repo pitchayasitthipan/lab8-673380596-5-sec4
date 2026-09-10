@@ -59,7 +59,6 @@ public class Product {
         }
     }
 
-    // Getters and Setters
     public Long getId() {
         return id;
     }
