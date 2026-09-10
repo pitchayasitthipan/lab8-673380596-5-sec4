@@ -31,7 +31,6 @@ public class ProductDetail {
     public ProductDetail() {
     }
 
-    // Getters and Setters
     public Long getId() {
         return id;
     }
